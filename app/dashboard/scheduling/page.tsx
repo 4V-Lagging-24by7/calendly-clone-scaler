@@ -1,4 +1,3 @@
-// app/dashboard/scheduling/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,7 +7,8 @@ import {
   Search,
   ExternalLink,
   Pencil,
-  Trash2
+  Trash2,
+  Copy
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,8 @@ export default function SchedulingPage() {
 
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
   async function load() {
 
     setLoading(true);
@@ -53,7 +55,6 @@ export default function SchedulingPage() {
     load();
   }, []);
 
-  // close dropdown when clicking outside
   useEffect(() => {
 
     const handler = (e: MouseEvent) => {
@@ -71,6 +72,17 @@ export default function SchedulingPage() {
     return () => document.removeEventListener("click", handler);
 
   }, []);
+
+  function copyLink(slug: string, id: string) {
+
+    const url = `${window.location.origin}/charvi/${slug}`;
+
+    navigator.clipboard.writeText(url);
+
+    setCopiedId(id);
+
+    setTimeout(() => setCopiedId(null), 2000);
+  }
 
   async function handleDelete(id: string) {
 
@@ -183,8 +195,6 @@ export default function SchedulingPage() {
 
         </div>
 
-        {/* FIXED LANDING PAGE LINK */}
-
         <Link
           href={`/charvi`}
           target="_blank"
@@ -215,13 +225,13 @@ export default function SchedulingPage() {
 
       ) : (
 
-        <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100 max-h-[65vh] overflow-y-auto">
+        <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
 
           {filtered.map((et) => (
 
             <div
               key={et.id}
-              className="flex items-center px-5 py-4 hover:bg-gray-50 group relative"
+              className="flex items-center px-5 py-4 hover:bg-gray-50 transition-colors group relative"
             >
 
               <div className="absolute left-0 top-3 bottom-3 w-1 bg-[#6366f1] rounded-r-full" />
@@ -235,11 +245,9 @@ export default function SchedulingPage() {
                   </h3>
 
                   {!et.isActive && (
-
                     <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
                       Off
                     </span>
-
                   )}
 
                 </div>
@@ -265,16 +273,12 @@ export default function SchedulingPage() {
               <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
 
                 <button
-                  onClick={() =>
-                    window.open(`/${"charvi"}/${et.slug}`, "_blank")
-                  }
+                  onClick={() => copyLink(et.slug, et.id)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-300 text-sm text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-colors"
                 >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  Manage Booking
+                  <Copy className="w-3.5 h-3.5" />
+                  {copiedId === et.id ? "Copied!" : "Copy Link"}
                 </button>
-
-                {/* menu */}
 
                 <div className="relative menu-container">
 
@@ -296,12 +300,22 @@ export default function SchedulingPage() {
                     >
 
                       <button
+                        onClick={() => window.open(`/charvi/${et.slug}`, "_blank")}
+                        className="w-full flex items-center gap-2 px-4 py-1.5 text-xs text-gray-700 hover:bg-gray-50"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        View booking page
+                      </button>
+
+                      <div className="border-t border-gray-100 my-1" />
+
+                      <button
                         onClick={() => {
                           setEditing(et);
                           setModalOpen(true);
                           setMenuOpen(null);
                         }}
-                        className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="w-full flex items-center gap-2 px-4 py-1.5 text-xs text-gray-700 hover:bg-gray-50"
                       >
                         <Pencil className="w-4 h-4" />
                         Edit
@@ -309,7 +323,7 @@ export default function SchedulingPage() {
 
                       <button
                         onClick={() => handleToggleActive(et)}
-                        className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="w-full flex items-center gap-2 px-4 py-1.5 text-xs text-gray-700 hover:bg-gray-50"
                       >
                         {et.isActive ? "Turn off" : "Turn on"}
                       </button>
@@ -321,7 +335,7 @@ export default function SchedulingPage() {
                           setDeleteConfirm(et.id);
                           setMenuOpen(null);
                         }}
-                        className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                        className="w-full flex items-center gap-2 px-4 py-1.5 text-xs text-red-600 hover:bg-red-50"
                       >
                         <Trash2 className="w-4 h-4" />
                         Delete
@@ -343,7 +357,7 @@ export default function SchedulingPage() {
 
       )}
 
-      {/* delete modal */}
+      {/* Delete Modal */}
 
       {deleteConfirm && (
 
@@ -356,8 +370,8 @@ export default function SchedulingPage() {
             </h3>
 
             <p className="text-sm text-gray-500 mb-5">
-              This will permanently delete this event type and all associated
-              bookings. This cannot be undone.
+              This will permanently delete this event type and all associated bookings.
+              This cannot be undone.
             </p>
 
             <div className="flex justify-end gap-3">
