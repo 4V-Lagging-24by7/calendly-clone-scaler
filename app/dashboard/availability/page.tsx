@@ -186,9 +186,13 @@ export default function AvailabilityPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Availability</h1>
 
-        <Button onClick={handleSave} disabled={saving}>
-          {saving ? "Saving…" : saved ? "✓ Saved" : "Save changes"}
-        </Button>
+        <Button
+  onClick={handleSave}
+  disabled={saving}
+  className="bg-[#006BFF] hover:bg-[#0053cc] text-white rounded-full px-6 py-2 font-medium"
+>
+  {saving ? "Saving…" : saved ? "✓ Saved" : "Save changes"}
+</Button>
       </div>
 
       {/* Tabs */}

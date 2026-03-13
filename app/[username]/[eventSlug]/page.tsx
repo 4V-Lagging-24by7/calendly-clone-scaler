@@ -215,142 +215,178 @@ export default function BookingPage() {
     );
   }
 
+  /* ---------------- CONFIRMATION ---------------- */
+
   if (step === "confirmed") {
-
-  return (
-
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center p-6">
-
-      {/* Back button */}
-
-      <button
-        onClick={() => router.push("/dashboard/scheduling")}
-        className="self-start mb-4 flex items-center gap-2 text-gray-600 hover:text-black"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back
-      </button>
-
-      <CheckCircle2 className="w-14 h-14 text-green-500 mb-4" />
-
-      <h1 className="text-2xl font-bold mb-2">
-        You're scheduled!
-      </h1>
-
-      <p className="text-gray-500 mb-6">
-        A calendar invitation has been sent.
-      </p>
-
-      <div className="bg-gray-50 rounded-xl p-4 text-left space-y-2 mb-6">
-
-        <p className="font-semibold">{displayTitle}</p>
-
-        <p className="flex gap-2 text-sm text-gray-600">
-          <Clock className="w-4 h-4" />
-          {eventType.duration} minutes
-        </p>
-
-        {selectedSlot && (
-          <p className="text-sm text-gray-600">
-            {format(parseISO(selectedSlot.start), "EEEE, MMM d")} at{" "}
-            {format(parseISO(selectedSlot.start), "h:mm a")}
-          </p>
-        )}
-
-        <p className="text-sm text-gray-600">
-          Invitee: {name}
-        </p>
-
-      </div>
-
-      <button
-        onClick={() => router.push("/dashboard/scheduling")}
-        className="text-green-600 font-medium"
-      >
-        Book another meeting
-      </button>
-
-    </div>
-
-  );
-}
-
-  if (step === "form" && selectedSlot) {
 
     return (
 
       <div className="min-h-screen bg-gray-50 flex flex-col items-center p-6">
 
+        {/* Calendly header */}
+
+        <div className="flex items-center gap-2 mb-6">
+          <div className="w-8 h-8 rounded-full bg-[#006BFF] flex items-center justify-center text-white font-bold">
+            C
+          </div>
+          <span className="text-[#006BFF] font-bold text-xl">
+            Calendly
+          </span>
+        </div>
+
         <button
-          onClick={() => setStep("calendar")}
+          onClick={() => router.push("/dashboard/scheduling")}
           className="self-start mb-4 flex items-center gap-2 text-gray-600 hover:text-black"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
         </button>
 
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 w-full max-w-2xl flex overflow-hidden">
+        <CheckCircle2 className="w-14 h-14 text-green-500 mb-4" />
 
-          <div className="w-64 border-r border-gray-200 p-6">
+        <h1 className="text-2xl font-bold mb-2">
+          You're scheduled!
+        </h1>
 
-            <h2 className="text-xl font-bold mb-4">
-              {displayTitle}
-            </h2>
+        <p className="text-gray-500 mb-6">
+          A calendar invitation has been sent.
+        </p>
 
-            <div className="space-y-3 text-sm text-gray-600">
+        <div className="bg-gray-50 rounded-xl p-4 text-left space-y-2 mb-6">
 
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                {eventType.duration} min
-              </div>
+          <p className="font-semibold">{displayTitle}</p>
 
-              <div className="flex items-center gap-2">
-                <Video className="w-4 h-4" />
-                Google Meet
-              </div>
+          <p className="flex gap-2 text-sm text-gray-600">
+            <Clock className="w-4 h-4" />
+            {eventType.duration} minutes
+          </p>
 
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4" />
-                IST
-              </div>
+          {selectedSlot && (
+            <p className="text-sm text-gray-600">
+              {format(parseISO(selectedSlot.start), "EEEE, MMM d")} at{" "}
+              {format(parseISO(selectedSlot.start), "h:mm a")}
+            </p>
+          )}
 
+          <p className="text-sm text-gray-600">
+            Invitee: {name}
+          </p>
+
+        </div>
+
+        <button
+          onClick={() => router.push("/dashboard/scheduling")}
+          className="text-green-600 font-medium"
+        >
+          Book another meeting
+        </button>
+
+      </div>
+
+    );
+  }
+
+  /* ---------------- FORM ---------------- */
+
+  if (step === "form" && selectedSlot) {
+
+  return (
+
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center p-6">
+
+      {/* Calendly header */}
+
+      <div className="flex items-center gap-2 mb-6">
+        <div className="w-8 h-8 rounded-full bg-[#006BFF] flex items-center justify-center text-white font-bold">
+          C
+        </div>
+
+        <span className="text-[#006BFF] font-bold text-xl">
+          Calendly
+        </span>
+      </div>
+
+      {/* Back button */}
+
+      <button
+        onClick={handleBackClick}
+        className="self-start mb-4 flex items-center gap-2 text-gray-600 hover:text-black"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back
+      </button>
+
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 w-full max-w-2xl flex overflow-hidden">
+
+        {/* Left panel */}
+
+        <div className="w-64 border-r border-gray-200 p-6">
+
+          <h2 className="text-xl font-bold mb-4">
+            {displayTitle}
+          </h2>
+
+          <div className="space-y-3 text-sm text-gray-600">
+
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              {eventType.duration} min
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Video className="w-4 h-4" />
+              Google Meet
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              IST
             </div>
 
           </div>
 
-          <div className="flex-1 p-6">
+        </div>
 
-            <h3 className="text-lg font-semibold mb-4">
-              Invitee's details
-            </h3>
+        {/* Right panel */}
 
-            <div className="space-y-4">
+        <div className="flex-1 p-6">
 
-              <div>
-                <Label>Name *</Label>
-                <Input value={name} onChange={(e) => setName(e.target.value)} />
-              </div>
+          <h3 className="text-lg font-semibold mb-4">
+            Invitee's details
+          </h3>
 
-              <div>
-                <Label>Email *</Label>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-              </div>
+          <div className="space-y-4">
 
-              {formError && (
-                <p className="text-sm text-red-600">
-                  {formError}
-                </p>
-              )}
-
-              <Button
-                className="w-full"
-                onClick={handleBook}
-                disabled={submitting}
-              >
-                {submitting ? "Scheduling..." : "Schedule Event"}
-              </Button>
-
+            <div>
+              <Label>Name *</Label>
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
             </div>
+
+            <div>
+              <Label>Email *</Label>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
+            {formError && (
+              <p className="text-sm text-red-600">
+                {formError}
+              </p>
+            )}
+
+            <Button
+              className="w-full"
+              onClick={handleBook}
+              disabled={submitting}
+            >
+              {submitting ? "Scheduling..." : "Schedule Event"}
+            </Button>
 
           </div>
 
@@ -358,12 +394,27 @@ export default function BookingPage() {
 
       </div>
 
-    );
-  }
+    </div>
+
+  );
+}
+
+  /* ---------------- CALENDAR ---------------- */
 
   return (
 
     <div className="min-h-screen bg-gray-50 flex flex-col items-center p-6">
+
+      {/* Calendly header */}
+
+      <div className="flex items-center gap-2 mb-6">
+        <div className="w-8 h-8 rounded-full bg-[#006BFF] flex items-center justify-center text-white font-bold">
+          C
+        </div>
+        <span className="text-[#006BFF] font-bold text-xl">
+          Calendly
+        </span>
+      </div>
 
       <button
         onClick={handleBackClick}
@@ -456,6 +507,46 @@ export default function BookingPage() {
         </div>
 
       </div>
+
+      {/* Leave confirmation modal */}
+
+      {showLeaveConfirm && (
+
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+
+          <div className="bg-white p-6 rounded-lg w-80">
+
+            <h3 className="font-semibold mb-2">
+              Leave booking?
+            </h3>
+
+            <p className="text-sm text-gray-500 mb-4">
+              Your progress will be lost.
+            </p>
+
+            <div className="flex justify-end gap-2">
+
+              <Button
+                variant="outline"
+                onClick={() => setShowLeaveConfirm(false)}
+              >
+                Keep going
+              </Button>
+
+              <Button
+                className="bg-red-600 text-white"
+                onClick={discardBooking}
+              >
+                Discard
+              </Button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
 
     </div>
 
