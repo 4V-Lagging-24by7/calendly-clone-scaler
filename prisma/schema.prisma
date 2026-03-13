@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(cuid())
+  name         String
+  username     String         @unique
+  email        String         @unique
+  timezone     String         @default("UTC")
+  createdAt    DateTime       @default(now())
+  availability Availability[]
+  bookings     Booking[]
+  eventTypes   EventType[]
+}
+
+model EventType {
+  id        String    @id @default(cuid())
+  userId    String
+  name      String
+  slug      String
+  duration  Int
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  bookings  Booking[]
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, slug])
+  @@index([userId])
+}
+
+model Availability {
+  id        String @id @default(cuid())
+  userId    String
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  timezone  String @default("UTC")
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Booking {
+  id           String        @id @default(cuid())
+  userId       String
+  eventTypeId  String
+  inviteeName  String
+  inviteeEmail String
+  startTime    DateTime
+  endTime      DateTime
+  status       BookingStatus @default(ACTIVE)
+  createdAt    DateTime      @default(now())
+  eventType    EventType     @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startTime])
+  @@index([eventTypeId])
+}
+
+enum BookingStatus {
+  ACTIVE
+  CANCELLED
+}

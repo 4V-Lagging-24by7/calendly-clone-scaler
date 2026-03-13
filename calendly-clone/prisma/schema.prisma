@@ -1,0 +1,76 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  username  String   @unique
+  email     String   @unique
+  timezone  String   @default("UTC")
+  createdAt DateTime @default(now())
+
+  eventTypes   EventType[]
+  availability Availability[]
+  bookings     Booking[]
+}
+
+model EventType {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  slug      String
+  duration  Int      // in minutes (e.g. 30, 60)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  @@unique([userId, slug]) // Prevent duplicate slugs per user
+  @@index([userId])
+}
+
+model Availability {
+  id         String @id @default(cuid())
+  userId     String
+  dayOfWeek  Int    // 0=Sunday, 1=Monday, ..., 6=Saturday
+  startTime  String // "09:00" (24-hour format)
+  endTime    String // "17:00"
+  timezone   String @default("UTC")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Booking {
+  id           String        @id @default(cuid())
+  userId       String        // The admin/host being booked
+  eventTypeId  String
+  inviteeName  String
+  inviteeEmail String
+  startTime    DateTime      // UTC datetime of the booking start
+  endTime      DateTime      // UTC datetime of the booking end (startTime + duration)
+  status       BookingStatus @default(ACTIVE)
+  createdAt    DateTime      @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventType EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startTime]) // Fast conflict detection query
+  @@index([eventTypeId])
+}
+
+enum BookingStatus {
+  ACTIVE
+  CANCELLED
+}
