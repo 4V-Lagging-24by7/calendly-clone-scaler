@@ -1,8 +1,7 @@
-// app/[username]/[eventSlug]/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Clock, Globe, CheckCircle2, Video, ArrowLeft } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
@@ -37,8 +36,14 @@ type Step = "calendar" | "form" | "confirmed";
 
 export default function BookingPage() {
 
-  const { username, eventSlug } = useParams<{ username: string; eventSlug: string }>();
+  const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const username = params.username as string;
+  const eventSlug = params.eventSlug as string;
+
+  const isQuickMeeting = searchParams.get("quick") === "true";
 
   const [user, setUser] = useState<User | null>(null);
   const [eventType, setEventType] = useState<EventType | null>(null);
@@ -61,7 +66,8 @@ export default function BookingPage() {
   const [availableDays, setAvailableDays] = useState<number[]>([]);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
-  /* Load user */
+  const displayTitle =
+    isQuickMeeting ? "New Meeting" : eventType?.name || "";
 
   useEffect(() => {
     async function load() {
@@ -88,13 +94,9 @@ export default function BookingPage() {
     }
 
     load();
-
   }, [username, eventSlug]);
 
-  /* Load availability */
-
   useEffect(() => {
-
     async function loadAvailability() {
 
       const res = await fetch("/api/availability");
@@ -107,10 +109,7 @@ export default function BookingPage() {
     }
 
     loadAvailability();
-
   }, []);
-
-  /* Load slots */
 
   useEffect(() => {
 
@@ -129,8 +128,6 @@ export default function BookingPage() {
       });
 
   }, [selectedDate, eventType, user, username]);
-
-  /* Booking */
 
   async function handleBook() {
 
@@ -186,8 +183,6 @@ export default function BookingPage() {
     }
   }
 
-  /* Back button */
-
   function handleBackClick() {
 
     if (step === "form") {
@@ -204,8 +199,6 @@ export default function BookingPage() {
     router.push("/dashboard/scheduling");
   }
 
-  /* Not found */
-
   if (notFound) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -213,8 +206,6 @@ export default function BookingPage() {
       </div>
     );
   }
-
-  /* Loading */
 
   if (!user || !eventType) {
     return (
@@ -224,72 +215,65 @@ export default function BookingPage() {
     );
   }
 
-  /* Confirmation */
-
   if (step === "confirmed") {
 
-    return (
+  return (
 
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center p-6">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center p-6">
 
-        <div className="flex items-center gap-2 mb-6">
-          <div className="w-8 h-8 rounded-full bg-[#006BFF] flex items-center justify-center text-white font-bold">
-            C
-          </div>
-          <span className="text-[#006BFF] font-bold text-xl">
-            Calendly
-          </span>
-        </div>
+      {/* Back button */}
 
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 w-full max-w-md p-8 text-center">
+      <button
+        onClick={() => router.push("/dashboard/scheduling")}
+        className="self-start mb-4 flex items-center gap-2 text-gray-600 hover:text-black"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back
+      </button>
 
-          <CheckCircle2 className="w-14 h-14 text-green-500 mx-auto mb-4" />
+      <CheckCircle2 className="w-14 h-14 text-green-500 mb-4" />
 
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            You're scheduled!
-          </h1>
+      <h1 className="text-2xl font-bold mb-2">
+        You're scheduled!
+      </h1>
 
-          <p className="text-gray-500 mb-6">
-            A calendar invitation has been sent.
+      <p className="text-gray-500 mb-6">
+        A calendar invitation has been sent.
+      </p>
+
+      <div className="bg-gray-50 rounded-xl p-4 text-left space-y-2 mb-6">
+
+        <p className="font-semibold">{displayTitle}</p>
+
+        <p className="flex gap-2 text-sm text-gray-600">
+          <Clock className="w-4 h-4" />
+          {eventType.duration} minutes
+        </p>
+
+        {selectedSlot && (
+          <p className="text-sm text-gray-600">
+            {format(parseISO(selectedSlot.start), "EEEE, MMM d")} at{" "}
+            {format(parseISO(selectedSlot.start), "h:mm a")}
           </p>
+        )}
 
-          <div className="bg-gray-50 rounded-xl p-4 text-left space-y-2 mb-6">
-
-            <p className="font-semibold">{eventType.name}</p>
-
-            <p className="flex gap-2 text-sm text-gray-600">
-              <Clock className="w-4 h-4" />
-              {eventType.duration} minutes
-            </p>
-
-            {selectedSlot && (
-              <p className="text-sm text-gray-600">
-                {format(parseISO(selectedSlot.start), "EEEE, MMM d")} at{" "}
-                {format(parseISO(selectedSlot.start), "h:mm a")}
-              </p>
-            )}
-
-            <p className="text-sm text-gray-600">
-              Invitee: {name}
-            </p>
-
-          </div>
-
-          <button
-            onClick={() => router.push("/dashboard/scheduling")}
-            className="text-green-600 font-medium"
-          >
-            Book another meeting
-          </button>
-
-        </div>
+        <p className="text-sm text-gray-600">
+          Invitee: {name}
+        </p>
 
       </div>
 
-    );
-  }
+      <button
+        onClick={() => router.push("/dashboard/scheduling")}
+        className="text-green-600 font-medium"
+      >
+        Book another meeting
+      </button>
 
-  /* Invitee form */
+    </div>
+
+  );
+}
 
   if (step === "form" && selectedSlot) {
 
@@ -310,7 +294,7 @@ export default function BookingPage() {
           <div className="w-64 border-r border-gray-200 p-6">
 
             <h2 className="text-xl font-bold mb-4">
-              {eventType.name}
+              {displayTitle}
             </h2>
 
             <div className="space-y-3 text-sm text-gray-600">
@@ -329,23 +313,6 @@ export default function BookingPage() {
                 <Globe className="w-4 h-4" />
                 IST
               </div>
-
-            </div>
-
-            <div className="mt-6 pt-4 border-t">
-
-              <p className="text-xs text-gray-400">
-                Selected time
-              </p>
-
-              <p className="text-sm font-semibold">
-                {format(parseISO(selectedSlot.start), "h:mm a")} –
-                {format(parseISO(selectedSlot.end), "h:mm a")}
-              </p>
-
-              <p className="text-sm text-gray-600">
-                {format(parseISO(selectedSlot.start), "EEEE, MMM d")}
-              </p>
 
             </div>
 
@@ -394,8 +361,6 @@ export default function BookingPage() {
     );
   }
 
-  /* Calendar */
-
   return (
 
     <div className="min-h-screen bg-gray-50 flex flex-col items-center p-6">
@@ -407,18 +372,6 @@ export default function BookingPage() {
         <ArrowLeft className="w-4 h-4" />
         Back
       </button>
-
-      <div className="flex items-center gap-2 mb-6">
-
-        <div className="w-8 h-8 rounded-full bg-[#006BFF] flex items-center justify-center text-white font-bold">
-          C
-        </div>
-
-        <span className="text-[#006BFF] font-bold text-xl">
-          Calendly
-        </span>
-
-      </div>
 
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 w-full max-w-4xl overflow-hidden">
 
@@ -434,7 +387,7 @@ export default function BookingPage() {
 
               <div>
                 <p className="text-sm text-gray-500">{user.name}</p>
-                <p className="text-lg font-semibold">{eventType.name}</p>
+                <p className="text-lg font-semibold">{displayTitle}</p>
               </div>
 
             </div>
@@ -503,44 +456,6 @@ export default function BookingPage() {
         </div>
 
       </div>
-
-      {showLeaveConfirm && (
-
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-
-          <div className="bg-white p-6 rounded-lg w-80">
-
-            <h3 className="font-semibold mb-2">
-              Leave booking?
-            </h3>
-
-            <p className="text-sm text-gray-500 mb-4">
-              Your progress will be lost.
-            </p>
-
-            <div className="flex justify-end gap-2">
-
-              <Button
-                variant="outline"
-                onClick={() => setShowLeaveConfirm(false)}
-              >
-                Keep going
-              </Button>
-
-              <Button
-                className="bg-red-600 text-white"
-                onClick={discardBooking}
-              >
-                Discard
-              </Button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      )}
 
     </div>
 
